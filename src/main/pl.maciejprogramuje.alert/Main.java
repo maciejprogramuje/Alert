@@ -2,11 +2,22 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 public class Main extends Application {
+    // ****************************************************************************
+    // *** IF *********************************************************************
+    // *** sun.security.validator.ValidatorException: PKIX path building failed ***
+    // *** TURN OFF ANTIVIRUS SOFTWARE ********************************************
+    // ****************************************************************************
+    // ****************************************************************************
+
+    //Set mail properties and configure accordingly
+    public static final String USERNAME_ZIMBRA = "";
+    public static final String PASSWORD_ZIMBRA = "";
+    public static final String ALERT_TITLE = "Alert SALESmanago: Wizyta - sklep.pb.pl m.szymczyk@pb.pl";
+    public static final String FOLDER_NAME = "SalesManago ALERT";
+
     public static void main(String[] args) {
         launch(args);
     }
