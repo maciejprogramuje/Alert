@@ -1,11 +1,50 @@
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.MessagingException;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleIntegerProperty;
+
+import javax.mail.*;
 import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Properties;
+
 
 public class StaticUtils {
+    static Message[] getMessagesReadWrite(SimpleIntegerProperty allMailsNum) throws MessagingException {
+        Store store = getMailStore();
+        Folder folder = getFolder(store);
+        folder.open(Folder.READ_WRITE);
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    allMailsNum.setValue(folder.getMessageCount());
+                } catch (MessagingException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        return folder.getMessages();
+    }
+
+    private static Folder getFolder(Store store) throws MessagingException {
+        store.connect("poczta.pb.pl", Main.USERNAME_ZIMBRA, Main.PASSWORD_ZIMBRA);
+        return store.getFolder("INBOX/" + Main.FOLDER_NAME);
+    }
+
+    private static Store getMailStore() throws NoSuchProviderException {
+        Properties properties = new Properties();
+        properties.setProperty("mail.store.protocol", "imaps");
+        properties.setProperty("mail.imaps.host", "poczta.pb.pl");
+        properties.setProperty("mail.imaps.port", "993");
+        properties.setProperty("mail.imaps.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        properties.setProperty("mail.imaps.socketFactory.fallback", "false");
+        Session session = Session.getInstance(properties);
+
+        return session.getStore("imaps");
+    }
+
     static boolean isNewScoringHigherThanOldScoring(User newUser, User oldUser) {
         if(newUser.getScoring() > oldUser.getScoring()) {
             return true;

@@ -13,8 +13,7 @@ public class Main extends Application {
     // ****************************************************************************
 
     //Set mail properties and configure accordingly
-    public static final String USERNAME_ZIMBRA = "";
-    public static final String PASSWORD_ZIMBRA = "";
+
     public static final String ALERT_TITLE = "Alert SALESmanago: Wizyta - sklep.pb.pl m.szymczyk@pb.pl";
     public static final String FOLDER_NAME = "SalesManago ALERT";
 

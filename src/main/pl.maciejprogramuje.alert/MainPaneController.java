@@ -1,19 +1,25 @@
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 
-import javax.mail.*;
+import javax.mail.Flags;
+import javax.mail.Message;
+import javax.mail.MessagingException;
 import java.util.ArrayList;
-import java.util.Properties;
+import java.util.Optional;
 
 public class MainPaneController {
+    public Button deleteButton;
+    public Label allMailsNumLabel;
+    public Label alertMailsNumLabel;
+
     private SimpleIntegerProperty allMailsNum = new SimpleIntegerProperty(0);
     private SimpleIntegerProperty alertMailsNum = new SimpleIntegerProperty(0);
     private ArrayList<User> users = new ArrayList<>();
-
-    public Label allMailsNumLabel;
-    public Label alertMailsNumLabel;
 
     @FXML
     public void initialize() {
@@ -27,38 +33,7 @@ public class MainPaneController {
             @Override
             public void run() {
                 try {
-                    Properties properties = new Properties();
-                    properties.setProperty("mail.store.protocol", "imaps");
-                    properties.setProperty("mail.imaps.host", "poczta.pb.pl");
-                    properties.setProperty("mail.imaps.port", "993");
-                    properties.setProperty("mail.imaps.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-                    properties.setProperty("mail.imaps.socketFactory.fallback", "false");
-                    Session session = Session.getInstance(properties);
-
-                    Store store = session.getStore("imaps");
-                    store.connect("poczta.pb.pl", Main.USERNAME_ZIMBRA, Main.PASSWORD_ZIMBRA);
-
-                    Folder folder = store.getFolder("INBOX/" + Main.FOLDER_NAME);
-                    folder.open(Folder.READ_ONLY);
-
-
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                allMailsNum.setValue(folder.getMessageCount());
-                            } catch (MessagingException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-
-                    // all messages
-                    Message[] messages = folder.getMessages();
-
-                    // only unread messages
-                    //Message[] messages = folder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
-
+                    Message[] messages = StaticUtils.getMessagesReadWrite(allMailsNum);
 
                     ArrayList<User> tempUsers = new ArrayList<>();
                     for (Message message : messages) {
@@ -73,9 +48,6 @@ public class MainPaneController {
                         tempUsers.add(StaticUtils.getUserFromContent(content));
                     }
 
-                    folder.close(false);
-                    store.close();
-
                     for (int i = 0; i < tempUsers.size(); i++) {
                         //System.out.println((i + 1) + ". tempUser: " + tempUsers.get(i).getName() + ", " + tempUsers.get(i).getScoring());
 
@@ -86,18 +58,18 @@ public class MainPaneController {
                                 && !tempUsers.get(i).getEmail().contains("@pulsmedycyny.pl")) {
                             if ((index = StaticUtils.isNotEmailInBase(tempUsers.get(i), users)) == -1) {
                                 users.add(tempUsers.get(i));
+
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        alertMailsNum.setValue(alertMailsNum.getValue() + 1);
+                                    }
+                                });
+
                             } else if(StaticUtils.isNewScoringHigherThanOldScoring(tempUsers.get(i), users.get(index))) {
                                 users.get(index).setScoring(tempUsers.get(i).getScoring());
                             }
                         }
-
-
-                        Platform.runLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                alertMailsNum.setValue(alertMailsNum.getValue() + 1);
-                            }
-                        });
                     }
 
                     System.out.println("==========================================");
@@ -112,5 +84,27 @@ public class MainPaneController {
         }).start();
     }
 
+    public void deleteEmailsOnClick() throws MessagingException {
+        System.out.println("click delete");
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("UWAGA");
+        alert.setHeaderText("Kasowanie e-maili");
+        alert.setContentText("Czy na pewno chcesz skasować wszystkie e-maile w folderze " + Main.FOLDER_NAME + "?");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == ButtonType.OK){
+            Message[] messages = StaticUtils.getMessagesReadWrite(allMailsNum);
+            for (Message m: messages) {
+                m.setFlag(Flags.Flag.DELETED, true);
+            }
+        } else {
+            alert.close();
+        }
+
+
+    }
+
 //TODO - przycisk delete all messages from folder
+    //TODO - czy scoring, czy data maila?
 }
