@@ -16,6 +16,7 @@ public class Main extends Application {
 
     public static final String ALERT_TITLE = "Alert SALESmanago: Wizyta - sklep.pb.pl m.szymczyk@pb.pl";
     public static final String FOLDER_NAME = "SalesManago ALERT";
+    public static final String MAIL_TO_LIST_FILE_NAME = "mailToList.txt";
 
     public static void main(String[] args) {
         launch(args);

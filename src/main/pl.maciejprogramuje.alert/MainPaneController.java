@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javax.mail.Flags;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -16,6 +17,7 @@ public class MainPaneController {
     public Button deleteButton;
     public Label allMailsNumLabel;
     public Label alertMailsNumLabel;
+    public Button sendEmails;
 
     private SimpleIntegerProperty allMailsNum = new SimpleIntegerProperty(0);
     private SimpleIntegerProperty alertMailsNum = new SimpleIntegerProperty(0);
@@ -66,16 +68,10 @@ public class MainPaneController {
                                     }
                                 });
 
-                            } else if(StaticUtils.isNewScoringHigherThanOldScoring(tempUsers.get(i), users.get(index))) {
+                            } else if (StaticUtils.isNewScoringHigherThanOldScoring(tempUsers.get(i), users.get(index))) {
                                 users.get(index).setScoring(tempUsers.get(i).getScoring());
                             }
                         }
-                    }
-
-                    System.out.println("==========================================");
-
-                    for (int i = 0; i < users.size(); i++) {
-                        System.out.println((i + 1) + ". user: " + users.get(i).getName() + ", mail: " + users.get(i).getEmail() + ", sc=" + users.get(i).getScoring());
                     }
                 } catch (Exception exp) {
                     exp.printStackTrace();
@@ -93,18 +89,35 @@ public class MainPaneController {
         alert.setContentText("Czy na pewno chcesz skasować wszystkie e-maile w folderze " + Main.FOLDER_NAME + "?");
 
         Optional<ButtonType> result = alert.showAndWait();
-        if (result.get() == ButtonType.OK){
+        if (result.get() == ButtonType.OK) {
             Message[] messages = StaticUtils.getMessagesReadWrite(allMailsNum);
-            for (Message m: messages) {
+            for (Message m : messages) {
                 m.setFlag(Flags.Flag.DELETED, true);
             }
         } else {
             alert.close();
         }
-
-
     }
 
-//TODO - przycisk delete all messages from folder
-    //TODO - czy scoring, czy data maila?
+    public void sendEmailsOnClick() throws MessagingException, IOException {
+        System.out.println("click send");
+
+        ArrayList<String> mailToArray = StaticUtils.readMailToList();
+        int mailToNum = mailToArray.size();
+
+        for (User user : users) {
+            mailToNum--;
+            if (mailToNum < 0) {
+                mailToNum = mailToArray.size() - 1;
+            }
+
+            String messageText = "name: " + user.getName() + "\n" +
+                    "e-mail: " + user.getEmail() + "\n" +
+                    "phone: " + user.getPhone() + "\n" +
+                    "scoring: " + user.getScoring() + "\n" +
+                    "\n" + user.getDetails();
+
+            StaticUtils.sendEmail(mailToArray.get(mailToNum), messageText);
+        }
+    }
 }

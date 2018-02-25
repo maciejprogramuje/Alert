@@ -2,7 +2,11 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
 
 import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -46,7 +50,7 @@ public class StaticUtils {
     }
 
     static boolean isNewScoringHigherThanOldScoring(User newUser, User oldUser) {
-        if(newUser.getScoring() > oldUser.getScoring()) {
+        if (newUser.getScoring() > oldUser.getScoring()) {
             return true;
         }
         return false;
@@ -54,7 +58,7 @@ public class StaticUtils {
 
     static int isNotEmailInBase(User user, ArrayList<User> users) {
         for (int i = 0; i < users.size(); i++) {
-            if(users.get(i).getEmail().equals(user.getEmail())) {
+            if (users.get(i).getEmail().equals(user.getEmail())) {
                 return i;
             }
         }
@@ -98,5 +102,43 @@ public class StaticUtils {
             }
         }
         return result;
+    }
+
+    public static void sendEmail(String mailTo, String messageText) throws MessagingException {
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "poczta.pb.pl");
+        props.put("mail.smtp.socketFactory.port", "465");
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.port", "465");
+
+        Session session = Session.getDefaultInstance(props,
+                new javax.mail.Authenticator() {
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(Main.USERNAME_ZIMBRA, Main.PASSWORD_ZIMBRA);
+                    }
+                });
+
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress("m.szymczyk@pb.pl"));
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(mailTo));
+        message.setSubject("SM Alert");
+        message.setText(messageText);
+
+        Transport.send(message);
+
+        //System.out.println("Done - sent to: " + mailTo);
+    }
+
+    public static ArrayList<String> readMailToList() throws IOException {
+        ArrayList<String> mailToArr = new ArrayList<>();
+
+        BufferedReader br = new BufferedReader(new FileReader(Main.MAIL_TO_LIST_FILE_NAME));
+        String line;
+        while ((line = br.readLine()) != null) {
+            mailToArr.add(line);
+        }
+
+        return mailToArr;
     }
 }
