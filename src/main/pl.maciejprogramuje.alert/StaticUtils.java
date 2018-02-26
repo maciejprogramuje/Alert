@@ -10,7 +10,12 @@ import javax.mail.internet.MimeMultipart;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 
@@ -130,6 +135,14 @@ public class StaticUtils {
         Transport.send(message);
 
         //System.out.println("Done - sent to: " + mailTo);
+    }
+
+    public static void writeMailToList(String newEmail, int index) throws IOException {
+        Path path = Paths.get(Main.MAIL_TO_LIST_FILE_NAME);
+        List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
+        lines.remove(index);
+        lines.add(index, newEmail);
+        Files.write(path, lines, StandardCharsets.UTF_8);
     }
 
     public static ArrayList<String> readMailToList() throws IOException {

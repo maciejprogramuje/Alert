@@ -15,6 +15,8 @@ public class Main extends Application {
     //Set mail properties and configure accordingly
     public static final String FOLDER_NAME = "SalesManago ALERT";
     public static final String MAIL_TO_LIST_FILE_NAME = "mailToList.txt";
+    public static final String USERNAME_ZIMBRA = "";
+    public static final String PASSWORD_ZIMBRA = "";
 
     public static void main(String[] args) {
         launch(args);

@@ -1,10 +1,11 @@
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 
 import javax.mail.Flags;
 import javax.mail.Message;
@@ -35,6 +36,27 @@ public class MainPaneController {
 
         emailConsumers = StaticUtils.readFileMailToList();
         emailColumn.setCellValueFactory(new PropertyValueFactory<EmailConsumer, String>("email"));
+        emailColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        emailColumn.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent>() {
+            @Override
+            public void handle(TableColumn.CellEditEvent event) {
+                String newEmail = event.getNewValue().toString();
+                int index = event.getTablePosition().getRow();
+
+                System.out.println(newEmail + ", " + index);
+
+                try {
+                    StaticUtils.writeMailToList(newEmail, index);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                ((EmailConsumer) event.getTableView()
+                        .getItems()
+                        .get(event.getTablePosition().getRow())).setEmail(newEmail);
+            }
+        });
+
         emailTable.setItems(emailConsumers);
 
 
