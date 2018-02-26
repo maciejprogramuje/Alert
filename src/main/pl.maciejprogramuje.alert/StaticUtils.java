@@ -1,5 +1,7 @@
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -140,5 +142,17 @@ public class StaticUtils {
         }
 
         return mailToArr;
+    }
+
+    public static ObservableList<EmailConsumer> readFileMailToList() throws IOException {
+        ObservableList<EmailConsumer> emailConsumers = FXCollections.observableArrayList();
+
+        BufferedReader br = new BufferedReader(new FileReader(Main.MAIL_TO_LIST_FILE_NAME));
+        String line;
+        while ((line = br.readLine()) != null) {
+            emailConsumers.add(new EmailConsumer(line));
+        }
+
+        return emailConsumers;
     }
 }

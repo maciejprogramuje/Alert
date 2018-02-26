@@ -13,8 +13,6 @@ public class Main extends Application {
     // ****************************************************************************
 
     //Set mail properties and configure accordingly
-
-    public static final String ALERT_TITLE = "Alert SALESmanago: Wizyta - sklep.pb.pl m.szymczyk@pb.pl";
     public static final String FOLDER_NAME = "SalesManago ALERT";
     public static final String MAIL_TO_LIST_FILE_NAME = "mailToList.txt";
 
@@ -27,6 +25,7 @@ public class Main extends Application {
         Scene scene = new Scene(parent);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Sales Alert");
+        primaryStage.setResizable(false);
         //preloaderStage.getIcons().add(new Image("images/gazele.png"));
         primaryStage.show();
     }

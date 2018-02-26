@@ -1,10 +1,10 @@
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 
 import javax.mail.Flags;
 import javax.mail.Message;
@@ -18,17 +18,25 @@ public class MainPaneController {
     public Label allMailsNumLabel;
     public Label alertMailsNumLabel;
     public Button sendEmails;
+    public TableView<EmailConsumer> emailTable;
+    public TableColumn emailColumn;
 
     private SimpleIntegerProperty allMailsNum = new SimpleIntegerProperty(0);
     private SimpleIntegerProperty alertMailsNum = new SimpleIntegerProperty(0);
     private ArrayList<User> users = new ArrayList<>();
+    private ObservableList<EmailConsumer> emailConsumers;
 
     @FXML
-    public void initialize() {
+    public void initialize() throws IOException {
         System.out.println("Start Alert!");
 
         allMailsNumLabel.textProperty().bind(allMailsNum.asString());
         alertMailsNumLabel.textProperty().bind(alertMailsNum.asString());
+
+        emailConsumers = StaticUtils.readFileMailToList();
+        emailColumn.setCellValueFactory(new PropertyValueFactory<EmailConsumer, String>("email"));
+        emailTable.setItems(emailConsumers);
+
 
         // Calling checkMailBox method to check received emails
         new Thread(new Runnable() {
